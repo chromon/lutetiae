@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <title>传书到手机</title>
+
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="logo">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="20" height="20"><path fill="white" d="M160 96a96 96 0 1 1 192 0A96 96 0 1 1 160 96zm80 152l0 264-48.4-24.2c-20.9-10.4-43.5-17-66.8-19.3l-96-9.6C12.5 457.2 0 443.5 0 427L0 224c0-17.7 14.3-32 32-32l30.3 0c63.6 0 125.6 19.6 177.7 56zm32 264l0-264c52.1-36.4 114.1-56 177.7-56l30.3 0c17.7 0 32 14.3 32 32l0 203c0 16.4-12.5 30.2-28.8 31.8l-96 9.6c-23.2 2.3-45.9 8.9-66.8 19.3L272 512z"/></svg>
+        </div>
+        <nav class="nav">
+            <a href="/">传书到手机</a>
+            <a href="/books">书籍列表</a>
+        </nav>
+    </div>
+    <div class="divider"></div>
+    <div class="upload-area" id="drop-area">
+        <div class="upload-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" width="30" height="30"><path fill="#5D646E" d="M144 480C64.5 480 0 415.5 0 336c0-62.8 40.2-116.2 96.2-135.9c-.1-2.7-.2-5.4-.2-8.1c0-88.4 71.6-160 160-160c59.3 0 111 32.2 138.7 80.2C409.9 102 428.3 96 448 96c53 0 96 43 96 96c0 12.2-2.3 23.8-6.4 34.6C596 238.4 640 290.1 640 352c0 70.7-57.3 128-128 128l-368 0zm79-217c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l39-39L296 392c0 13.3 10.7 24 24 24s24-10.7 24-24l0-134.1 39 39c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-80-80c-9.4-9.4-24.6-9.4-33.9 0l-80 80z"/></svg>
+        </div>
+        <div class="upload-text">拖拽文件到此处 或 <span class="choose-file" onclick="document.getElementById('fileInput').click()">选择文件</span></div>
+        <div class="file-types">支持 txt / pdf / epub / doc / docx / mobi / azw3 等格式，上传完成后可在「书架」中查看</div>
+        <input type="file" id="fileInput" accept=".txt,.pdf,.epub,.doc,.docx,.mobi,.azw3">
+    </div>
+    <div class="error-message"></div>
+    <div id="upload-progress" class="upload-progress"></div>
+</div>
+
+<script src="/script.js"></script>
+</body>
+</html>
