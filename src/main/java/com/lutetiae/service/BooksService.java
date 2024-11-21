@@ -22,10 +22,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Objects;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 /**
  * 书籍处理 service
@@ -73,12 +72,25 @@ public class BooksService {
         Files.write(filePath, file.getBytes());
         logger.info("上传文件成功：" + fileName);
 
+        //    {
+        //        id: {
+        //            name: "",
+        //            type: "",
+        //            size: "",
+        //        }
+        //    }
         // 创建元数据
         Map<String, Object> metadata = new HashMap<>();
-        metadata.put("bookName", fileName);
-        metadata.put("contentType", file.getContentType());
+        // 生成唯一 id
+        DateTimeFormatter DEFAULT_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+        String timestamp = LocalDateTime.now().format(DEFAULT_FORMATTER);
+        String uniqueId = UUID.randomUUID().toString().substring(0, 8);
+        String id = String.format("%s_%s", timestamp, uniqueId);
+
+        metadata.put("name", fileName);
+        metadata.put("type", file.getContentType());
         metadata.put("size", file.getSize());
-        fileMetadata.put(fileName, metadata);
+        fileMetadata.put(id, metadata);
 
         // 保存元数据为JSON文件
         saveMetadata();
@@ -94,16 +106,25 @@ public class BooksService {
     private boolean isFileExist(MultipartFile file) {
         Map<String, Map<String, Object>> existingMetadata = getFilesMetadata();
 
-        if (existingMetadata.containsKey(file.getOriginalFilename())) {
-            Map<String, Object> fileInfo = existingMetadata.get(file.getOriginalFilename());
-            long existingSize = Long.parseLong(fileInfo.get("size").toString());
+        String value = file.getOriginalFilename();
+        long size = file.getSize();
 
-            if (!(existingSize == file.getSize())) {
-                logger.info("已存在的同名文件（其他属性待定）：" + file.getOriginalFilename());
-                return true;
+        boolean nameExists = existingMetadata.values().stream()
+                .anyMatch(innerMap -> {
+                    assert value != null;
+                    return value.equals(innerMap.get("name"));
+                });
+        if (nameExists) {
+            boolean sizeExists = existingMetadata.values().stream()
+                    .anyMatch(innerMap -> {
+                        long existingSize = Long.parseLong(innerMap.get("size").toString());
+                        return (size == existingSize);
+                    });
+            if (!sizeExists) {
+                logger.info("已存在的同名文件，文件大小不同：" + file.getOriginalFilename());
+            } else {
+                logger.info("已存在相同文件：" + file.getOriginalFilename());
             }
-
-            logger.info("已存在相同文件：" + file.getOriginalFilename());
             return true;
         }
         return false;
@@ -176,10 +197,13 @@ public class BooksService {
     /**
      * 下载文件
      *
-     * @param fileName 文件名
+     * @param id 文件名
      * @return 响应信息
      */
-    public ResponseEntity<Resource> downloadFile(String fileName) {
+    public ResponseEntity<Resource> downloadFile(String id) {
+        Map<String, Map<String, Object>> metadata = getFilesMetadata();
+        String fileName = (String) metadata.get(id).get("name");
+
         try {
             Path filePath = Paths.get(uploadDir).resolve(fileName).normalize();
             Resource resource = new UrlResource(filePath.toUri());
@@ -191,6 +215,7 @@ public class BooksService {
                 String contentDisposition = "attachment; filename*=UTF-8''" + encodedFileName;
 
                 logger.info("下载文件成功：" + fileName);
+
                 return ResponseEntity.ok()
                         .contentType(MediaType.APPLICATION_OCTET_STREAM)
                         .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
@@ -206,11 +231,14 @@ public class BooksService {
     /**
      * 删除文件
      *
-     * @param fileName 文件名
+     * @param id 文件 id
      * @return 是否删除成功
      * @throws IOException 异常
      */
-    public boolean deleteFile(String fileName) throws IOException {
+    public boolean deleteFile(String id) throws IOException {
+        Map<String, Map<String, Object>> metadata = getFilesMetadata();
+        String fileName = (String) metadata.get(id).get("name");
+
         Path filePath = Paths.get(uploadDir, fileName);
         Path jsonFilePath = Paths.get(uploadDir, metaDataName);
 
@@ -221,8 +249,8 @@ public class BooksService {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode rootNode = objectMapper.readTree(jsonFilePath.toFile());
 
-        if (rootNode.has(fileName)) {
-            ((ObjectNode) rootNode).remove(fileName);
+        if (rootNode.has(id)) {
+            ((ObjectNode) rootNode).remove(id);
             objectMapper.writeValue(jsonFilePath.toFile(), rootNode);
             logger.info("删除源文件以及元数据信息成功：" + fileName);
             return isFileDeleted;

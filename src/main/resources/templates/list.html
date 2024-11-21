@@ -29,9 +29,9 @@
     <div class="book-list">
         <div class="list-item" th:each="book: ${books}">
             <div class="item-bar">
-                <div class="book-name" th:text="${book.value['bookName']}"></div>
-                <a class="download" th:href="@{'/download/' + ${book.value['bookName']}}">下载</a>
-                <a class="delete" th:href="@{'/delete/' + ${book.value['bookName']}}">删除</a>
+                <div class="book-name" th:text="${book.value['name']}"></div>
+                <a class="download" th:href="@{'/download/' + ${book.key}}">下载</a>
+                <a class="delete" th:href="@{'/delete/' + ${book.key}}">删除</a>
             </div>
         </div>
     </div>

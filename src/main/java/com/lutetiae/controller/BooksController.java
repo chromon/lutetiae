@@ -89,24 +89,24 @@ public class BooksController {
     /**
      * 下载文件
      *
-     * @param fileName 文件名
+     * @param id json id
      * @return 响应信息
      */
-    @GetMapping("/download/{fileName:.+}")
-    public ResponseEntity<Resource> downloadFile(@PathVariable String fileName) {
-        return booksService.downloadFile(fileName);
+    @GetMapping("/download/{id:.+}")
+    public ResponseEntity<Resource> downloadFile(@PathVariable String id) {
+        return booksService.downloadFile(id);
     }
 
     /**
      * 删除文件
      *
-     * @param fileName 文件名
+     * @param id 文件 id
      * @return 重定向到图书列表页面
      */
-    @GetMapping("/delete/{fileName}")
-    public String deleteFile(@PathVariable String fileName) {
+    @GetMapping("/delete/{id}")
+    public String deleteFile(@PathVariable String id) {
         try {
-            booksService.deleteFile(fileName);
+            booksService.deleteFile(id);
         } catch (IOException e) {
             logger.error("删除文件失败：" + e.getMessage());
         }
